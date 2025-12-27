@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon --watch src --exec ts-node src/bot.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r src/prompts dist/prompts",
     "start": "node dist/bot.js",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
