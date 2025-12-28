@@ -91,7 +91,7 @@ Always return **EXACTLY ONE JSON object** with this structure:
 ```json
 {
   "input": "string",
-  "status": "success" | "multiple_words" | "invalid_word" | "error",
+  "status": "success | multiple_words | invalid_word | error",
 
   "entry": {
     "normalized": "string | null",
