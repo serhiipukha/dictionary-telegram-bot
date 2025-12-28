@@ -1,4 +1,4 @@
-import { bold, italic, fmt } from "telegraf/format";
+import { bold, fmt } from "telegraf/format";
 import { FmtString } from "telegraf/format";
 import { DictionaryResponse } from "../types";
 import { MESSAGE_TEXT } from "../constants";
