@@ -24,6 +24,7 @@ You must output one of the following status values:
 
 #### Rules:
 
+- **Accept any single word or dictionary entry** that exists in an English dictionary, regardless of part of speech (nouns, verbs, adjectives, adverbs, interjections, exclamations, etc.)
 - Try correcting misspellings. If correction leads to a valid entry → status `"success"`
 - Do NOT produce any `"sentence"` classification
 - Treat simple noun phrases with articles as a single entry:
@@ -32,10 +33,11 @@ You must output one of the following status values:
   - `"the internet"` → success → normalized `"internet"`
 - Treat dictionary-style multi-word entries as success:
   - Phrasal verbs: `"run out"`, `"get up"`, `"look into"`
-  - Fixed expressions: `"at all"`, `"on time"`
-- Use `"multiple_words"` ONLY when the input consists of unrelated words or conversational/normal text:
-  - `"hello nice to meet you"`
-  - `"I want to go to the store now"`
+  - Fixed expressions: `"at all"`, `"on time"`, `"good morning"`
+- Use `"multiple_words"` ONLY when the input is a full sentence or contains multiple unrelated words:
+  - `"I want to go there"` (sentence)
+  - `"cat dog bird house"` (unrelated words)
+- Use `"invalid_word"` ONLY for nonsense, non-English text, or gibberish that cannot be interpreted as any English word
 
 ---
 
@@ -46,7 +48,7 @@ You must output one of the following status values:
 Provide:
 
 - **`entry.normalized`**: base dictionary form (e.g., `"run"`)
-- **`entry.partOfSpeech`**: e.g., `"noun"`, `"verb"`, `"adjective"`, `"phrasal verb"`
+- **`entry.partOfSpeech`**: e.g., `"noun"`, `"verb"`, `"adjective"`, `"adverb"`, `"interjection"`, `"phrasal verb"`, `"exclamation"`
 - **`entry.ipa`**: phonetic transcription (e.g., `"/rʌn/"`)
 - **`entry.englishDefinition`**: a short explanation in Cambridge Dictionary style
 - **`entry.englishExamples`**: 1–2 clear Cambridge-style example sentences
