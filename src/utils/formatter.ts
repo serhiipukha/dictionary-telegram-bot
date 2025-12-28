@@ -8,21 +8,21 @@ export class ResponseFormatter {
     const { entry, translation } = response;
 
     // Build main word section
-    const wordSection = fmt`${bold(entry.normalized || "")} (${italic(entry.partOfSpeech || "")})
+    const wordSection = fmt`${bold(entry.normalized || "")} (${entry.partOfSpeech || ""})
 ${entry.ipa || ""}
 
-  ${bold("Meaning")}
-  ${entry.englishDefinition || ""}`;
+${bold("Meaning:")}
+${entry.englishDefinition || ""}`;
 
     // Build examples section if available
     let examplesSection = fmt``;
     if (entry.englishExamples.length > 0) {
       const examplesList = entry.englishExamples
-        .map((ex, idx) => `  ${idx + 1}) ${ex}`)
+        .map((ex, idx) => `${idx + 1}) ${ex}`)
         .join("\n");
       examplesSection = fmt`
 
-  ${bold("Examples")}
+${bold("Examples:")}
 ${examplesList}`;
     }
 
@@ -31,19 +31,21 @@ ${examplesList}`;
     if (translation.translatedWord) {
       translationSection = fmt`
 
-  
-${bold("Translation")}
+🌐 ${bold("Translation")}
 
-  ${bold("Meaning")}
-  ${translation.translatedDefinition || ""}`;
+${bold("Word:")}
+${translation.translatedWord}
+
+${bold("Meaning:")}
+${translation.translatedDefinition || ""}`;
 
       if (translation.translatedExamples.length > 0) {
         const translatedExamplesList = translation.translatedExamples
-          .map((ex, idx) => `  ${idx + 1}) ${ex}`)
+          .map((ex, idx) => `${idx + 1}) ${ex}`)
           .join("\n");
         translationSection = fmt`${translationSection}
 
-  ${bold("Examples")}
+${bold("Examples:")}
 ${translatedExamplesList}`;
       }
     }
