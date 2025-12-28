@@ -3,6 +3,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { config } from "../config";
 import { DictionaryResponse, DictionaryRequestParams } from "../types";
+import { SUPPORTED_LANGUAGES, LanguageCode } from "../constants";
 
 export class DictionaryService {
   private openai: OpenAI;
@@ -21,8 +22,14 @@ export class DictionaryService {
     userInput: string,
     targetLanguage: string | null
   ): string {
+    // Convert language code to full language name
+    let languageForPrompt: string | null = targetLanguage;
+    if (targetLanguage && targetLanguage in SUPPORTED_LANGUAGES) {
+      languageForPrompt = SUPPORTED_LANGUAGES[targetLanguage as LanguageCode];
+    }
+
     return `User input: ${userInput}
-Target language: ${targetLanguage || "null"}`;
+Target language: ${languageForPrompt || "null"}`;
   }
 
   async lookupWord(
