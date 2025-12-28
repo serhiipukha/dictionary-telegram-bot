@@ -72,14 +72,34 @@ bot.on(message("text"), async ctx => {
 });
 
 // Launch the bot
-bot
-  .launch({
-    dropPendingUpdates: true,
-  })
-  .catch(error => {
-    console.error("Failed to launch bot:", error);
-    process.exit(1);
-  });
+const RAILWAY_PUBLIC_DOMAIN = process.env.RAILWAY_PUBLIC_DOMAIN;
+
+if (RAILWAY_PUBLIC_DOMAIN) {
+  // Production: use webhooks
+  const webhookUrl = `https://${RAILWAY_PUBLIC_DOMAIN}/webhook`;
+  bot
+    .launch({
+      webhook: {
+        domain: webhookUrl,
+        port: 8080,
+      },
+      dropPendingUpdates: true,
+    })
+    .catch(error => {
+      console.error("Failed to launch bot:", error);
+      process.exit(1);
+    });
+} else {
+  // Development: use polling
+  bot
+    .launch({
+      dropPendingUpdates: true,
+    })
+    .catch(error => {
+      console.error("Failed to launch bot:", error);
+      process.exit(1);
+    });
+}
 
 // Enable graceful stop
 process.once("SIGINT", () => bot.stop("SIGINT"));
