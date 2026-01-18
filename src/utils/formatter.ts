@@ -1,7 +1,8 @@
 import { bold, fmt } from "telegraf/format";
 import { FmtString } from "telegraf/format";
+import { InlineKeyboardMarkup } from "telegraf/types";
 import { DictionaryResponse } from "../types";
-import { MESSAGE_TEXT } from "../constants";
+import { MESSAGE_TEXT, TTS_CALLBACK_PREFIX } from "../constants";
 
 export class ResponseFormatter {
   formatSuccess(response: DictionaryResponse): FmtString {
@@ -51,6 +52,19 @@ ${translatedExamplesList}`;
     }
 
     return fmt`${wordSection}${examplesSection}${translationSection}`;
+  }
+
+  createTTSKeyboard(normalizedWord: string): InlineKeyboardMarkup {
+    return {
+      inline_keyboard: [
+        [
+          {
+            text: "🔊 Pronounce",
+            callback_data: `${TTS_CALLBACK_PREFIX}${normalizedWord}`,
+          },
+        ],
+      ],
+    };
   }
 
   formatMultipleWords(): string {

@@ -3,14 +3,21 @@ import { message } from "telegraf/filters";
 import { config } from "./config";
 import { DictionaryService } from "./services/dictionary.service";
 import { UserSettingsService } from "./services/user-settings.service";
+import { TTSService } from "./services/tts.service";
 import { ResponseFormatter } from "./utils/formatter";
 import { TextHandler } from "./handlers/text.handler";
 import { LanguageHandler } from "./handlers/language.handler";
-import { MESSAGE_TEXT, LANGUAGE_CALLBACK_PREFIX } from "./constants";
+import { TTSHandler } from "./handlers/tts.handler";
+import {
+  MESSAGE_TEXT,
+  LANGUAGE_CALLBACK_PREFIX,
+  TTS_CALLBACK_PREFIX,
+} from "./constants";
 
 // Initialize services
 const dictionaryService = new DictionaryService();
 const userSettingsService = new UserSettingsService();
+const ttsService = new TTSService();
 const formatter = new ResponseFormatter();
 
 // Initialize handlers
@@ -20,6 +27,7 @@ const textHandler = new TextHandler(
   formatter
 );
 const languageHandler = new LanguageHandler(userSettingsService);
+const ttsHandler = new TTSHandler(ttsService);
 
 // Create bot instance
 const bot = new Telegraf(config.telegram.botToken);
@@ -50,10 +58,20 @@ bot.on("callback_query", async ctx => {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) return;
 
   const data = ctx.callbackQuery.data;
-  if (!data.startsWith(LANGUAGE_CALLBACK_PREFIX)) return;
 
-  const languageCode = data.substring(LANGUAGE_CALLBACK_PREFIX.length);
-  await languageHandler.handleLanguageSelection(ctx, languageCode);
+  // Handle language selection
+  if (data.startsWith(LANGUAGE_CALLBACK_PREFIX)) {
+    const languageCode = data.substring(LANGUAGE_CALLBACK_PREFIX.length);
+    await languageHandler.handleLanguageSelection(ctx, languageCode);
+    return;
+  }
+
+  // Handle TTS requests
+  if (data.startsWith(TTS_CALLBACK_PREFIX)) {
+    const word = data.substring(TTS_CALLBACK_PREFIX.length);
+    await ttsHandler.handle(ctx, word);
+    return;
+  }
 });
 
 // Handle unknown commands

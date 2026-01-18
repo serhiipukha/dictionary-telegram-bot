@@ -22,6 +22,7 @@ export type LanguageCode = keyof typeof SUPPORTED_LANGUAGES;
 
 export const LANGUAGE_CALLBACK_PREFIX = "lang:" as const;
 export const LANGUAGE_DISABLE_CODE = "none" as const;
+export const TTS_CALLBACK_PREFIX = "tts:" as const;
 
 export const LANGUAGE_NAMES = Object.entries(SUPPORTED_LANGUAGES).map(
   ([code, name]) => ({
