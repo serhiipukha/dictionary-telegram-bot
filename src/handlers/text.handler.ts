@@ -37,7 +37,16 @@ export class TextHandler {
       // Format and send response
       switch (response.status) {
         case "success":
-          await ctx.reply(this.formatter.formatSuccess(response));
+          // Only show TTS button if we have a normalized word
+          const replyOptions = response.entry.normalized
+            ? {
+                reply_markup: this.formatter.createTTSKeyboard(
+                  response.entry.normalized
+                ),
+              }
+            : {};
+          
+          await ctx.reply(this.formatter.formatSuccess(response), replyOptions);
           break;
 
         case "multiple_words":
