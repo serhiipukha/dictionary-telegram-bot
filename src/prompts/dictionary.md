@@ -59,12 +59,14 @@ Provide:
 
 The JSON must **ALWAYS** contain the `"translation"` object.
 
+**IMPORTANT:** Always translate the **normalized** word (from `entry.normalized`), NOT the user's original input. For example, if the user inputs "cats", translate "cat" (the normalized form).
+
 #### If `targetLanguage` is provided (not null):
 
 Fill:
-- `translation.translatedWord`
-- `translation.translatedDefinition`
-- `translation.translatedExamples`
+- `translation.translatedWord` - translation of the **normalized** word
+- `translation.translatedDefinition` - translated definition
+- `translation.translatedExamples` - translated examples
 
 #### If `targetLanguage` is null:
 
