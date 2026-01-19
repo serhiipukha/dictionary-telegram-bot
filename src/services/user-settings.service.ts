@@ -1,29 +1,68 @@
 import { UserSettings } from "../types";
 import { LanguageCode } from "../constants";
+import { SupabaseService } from "./supabase.service";
 
 export class UserSettingsService {
-  private settings: Map<number, UserSettings>;
+  private cache: Map<number, UserSettings>;
+  private supabase;
 
-  constructor() {
-    this.settings = new Map();
+  constructor(supabaseService: SupabaseService) {
+    this.cache = new Map();
+    this.supabase = supabaseService.getClient();
   }
 
-  getSettings(userId: number): UserSettings {
-    if (!this.settings.has(userId)) {
-      this.settings.set(userId, {
-        targetLanguage: null,
-      });
+  async getSettings(userId: number): Promise<UserSettings> {
+    if (this.cache.has(userId)) {
+      return this.cache.get(userId)!;
     }
-    return this.settings.get(userId)!;
+
+    const { data, error } = await this.supabase
+      .from("user_settings")
+      .select("target_language")
+      .eq("user_id", userId)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      // PGRST116 = row not found, which is fine for new users
+      console.error("Error fetching user settings:", error);
+    }
+
+    const settings: UserSettings = {
+      targetLanguage: data?.target_language || null,
+    };
+
+    this.cache.set(userId, settings);
+
+    return settings;
   }
 
-  setTargetLanguage(userId: number, language: LanguageCode | null): void {
-    const settings = this.getSettings(userId);
+  async setTargetLanguage(
+    userId: number,
+    language: LanguageCode | null
+  ): Promise<void> {
+    const { error } = await this.supabase
+      .from("user_settings")
+      .upsert(
+        {
+          user_id: userId,
+          target_language: language,
+        },
+        {
+          onConflict: "user_id",
+        }
+      );
+
+    if (error) {
+      console.error("Error saving user settings:", error);
+      throw error;
+    }
+
+    const settings = await this.getSettings(userId);
     settings.targetLanguage = language;
-    this.settings.set(userId, settings);
+    this.cache.set(userId, settings);
   }
 
-  disableTranslation(userId: number): void {
-    this.setTargetLanguage(userId, null);
+  async disableTranslation(userId: number): Promise<void> {
+    await this.setTargetLanguage(userId, null);
   }
 }

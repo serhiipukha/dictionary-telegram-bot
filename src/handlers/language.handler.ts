@@ -14,7 +14,7 @@ export class LanguageHandler {
   async showLanguageSelection(ctx: Context): Promise<void> {
     if (!ctx.from) return;
 
-    const settings = this.userSettingsService.getSettings(ctx.from.id);
+    const settings = await this.userSettingsService.getSettings(ctx.from.id);
 
     let message = "🌐 Select translation language:";
     if (settings.targetLanguage) {
@@ -56,7 +56,7 @@ export class LanguageHandler {
 
     // Check if disabling translation
     if (languageCode === LANGUAGE_DISABLE_CODE) {
-      this.userSettingsService.disableTranslation(ctx.from.id);
+      await this.userSettingsService.disableTranslation(ctx.from.id);
       await ctx.answerCbQuery();
       await ctx.editMessageText("✅ Translation disabled");
       return;
@@ -69,7 +69,7 @@ export class LanguageHandler {
     }
 
     const languageName = SUPPORTED_LANGUAGES[languageCode as LanguageCode];
-    this.userSettingsService.setTargetLanguage(
+    await this.userSettingsService.setTargetLanguage(
       ctx.from.id,
       languageCode as LanguageCode
     );

@@ -2,7 +2,9 @@ import { Telegraf } from "telegraf";
 import { message } from "telegraf/filters";
 import { config } from "./config";
 import { DictionaryService } from "./services/dictionary.service";
+import { SupabaseService } from "./services/supabase.service";
 import { UserSettingsService } from "./services/user-settings.service";
+import { WordRequestLogger } from "./services/word-request-logger.service";
 import { TTSService } from "./services/tts.service";
 import { ResponseFormatter } from "./utils/formatter";
 import { TextHandler } from "./handlers/text.handler";
@@ -15,8 +17,10 @@ import {
 } from "./constants";
 
 // Initialize services
+const supabaseService = new SupabaseService();
 const dictionaryService = new DictionaryService();
-const userSettingsService = new UserSettingsService();
+const userSettingsService = new UserSettingsService(supabaseService);
+const wordRequestLogger = new WordRequestLogger(supabaseService);
 const ttsService = new TTSService();
 const formatter = new ResponseFormatter();
 
@@ -24,6 +28,7 @@ const formatter = new ResponseFormatter();
 const textHandler = new TextHandler(
   dictionaryService,
   userSettingsService,
+  wordRequestLogger,
   formatter
 );
 const languageHandler = new LanguageHandler(userSettingsService);

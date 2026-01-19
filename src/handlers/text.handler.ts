@@ -1,6 +1,7 @@
 import { Context } from "telegraf";
 import { DictionaryService } from "../services/dictionary.service";
 import { UserSettingsService } from "../services/user-settings.service";
+import { WordRequestLogger } from "../services/word-request-logger.service";
 import { ResponseFormatter } from "../utils/formatter";
 import { MESSAGE_TEXT } from "../constants";
 
@@ -8,6 +9,7 @@ export class TextHandler {
   constructor(
     private dictionaryService: DictionaryService,
     private userSettingsService: UserSettingsService,
+    private wordRequestLogger: WordRequestLogger,
     private formatter: ResponseFormatter
   ) {}
 
@@ -24,13 +26,16 @@ export class TextHandler {
 
     try {
       // Get user settings
-      const settings = this.userSettingsService.getSettings(userId);
+      const settings = await this.userSettingsService.getSettings(userId);
 
       // Lookup word
       const response = await this.dictionaryService.lookupWord({
         userInput: text,
         targetLanguage: settings.targetLanguage,
       });
+
+      // Log the request (don't await - fire and forget)
+      this.wordRequestLogger.log(response);
 
       await ctx.deleteMessage(processingMsg.message_id);
 
