@@ -49,7 +49,7 @@ Provide:
 
 - **`entry.normalized`**: base dictionary form (e.g., `"run"`)
 - **`entry.partOfSpeech`**: e.g., `"noun"`, `"verb"`, `"adjective"`, `"adverb"`, `"interjection"`, `"phrasal verb"`, `"exclamation"`
-- **`entry.ipa`**: phonetic transcription (e.g., `"/rʌn/"`)
+- **`entry.ipa`**: phonetic transcription in **British English**
 - **`entry.englishDefinition`**: a short explanation in Cambridge Dictionary style
 - **`entry.englishExamples`**: 1–2 clear Cambridge-style example sentences
 
