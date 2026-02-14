@@ -10,17 +10,21 @@ export class TTSHandler {
       return;
     }
 
+    const chatId = ctx.chat!.id;
     const messageId = ctx.callbackQuery.message.message_id;
 
     try {
-      // Answer callback query to remove loading state
-      await ctx.answerCbQuery("🔊 Generating audio...");
+      // Remove the button immediately to prevent duplicate clicks
+      await Promise.all([
+        ctx.answerCbQuery("🔊 Generating audio..."),
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] }),
+      ]);
 
       // Generate audio file
       const audioPath = await this.ttsService.generateSpeech(word);
 
       // Send voice message as a reply to the original message
-      await ctx.telegram.sendVoice(ctx.chat!.id, Input.fromLocalFile(audioPath), {
+      await ctx.telegram.sendVoice(chatId, Input.fromLocalFile(audioPath), {
         reply_to_message_id: messageId,
       } as any);
 
@@ -30,7 +34,7 @@ export class TTSHandler {
       console.error("Error in TTS handler:", error);
       await ctx.answerCbQuery("❌ Failed to generate audio", {
         show_alert: true,
-      });
+      }).catch(() => {});
     }
   }
 }
