@@ -1,14 +1,15 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import { UserSettings } from "../types";
 import { LanguageCode } from "../constants";
 import { SupabaseService } from "./supabase.service";
 
 export class UserSettingsService {
   private cache: Map<number, UserSettings>;
-  private supabase;
+  private supabase: SupabaseClient | null;
 
-  constructor(supabaseService: SupabaseService) {
+  constructor(supabaseService: SupabaseService | null) {
     this.cache = new Map();
-    this.supabase = supabaseService.getClient();
+    this.supabase = supabaseService?.getClient() ?? null;
   }
 
   async getSettings(userId: number): Promise<UserSettings> {
@@ -16,23 +17,32 @@ export class UserSettingsService {
       return this.cache.get(userId)!;
     }
 
-    const { data, error } = await this.supabase
-      .from("user_settings")
-      .select("target_language")
-      .eq("user_id", userId)
-      .single();
+    if (this.supabase) {
+      try {
+        const { data, error } = await this.supabase
+          .from("user_settings")
+          .select("target_language")
+          .eq("user_id", userId)
+          .single();
 
-    if (error && error.code !== "PGRST116") {
-      // PGRST116 = row not found, which is fine for new users
-      console.error("Error fetching user settings:", error);
+        if (error && error.code !== "PGRST116") {
+          console.error("Error fetching user settings:", error);
+        }
+
+        if (data?.target_language) {
+          const settings: UserSettings = {
+            targetLanguage: data.target_language,
+          };
+          this.cache.set(userId, settings);
+          return settings;
+        }
+      } catch (error) {
+        console.error("Failed to fetch user settings:", error);
+      }
     }
 
-    const settings: UserSettings = {
-      targetLanguage: data?.target_language || null,
-    };
-
+    const settings: UserSettings = { targetLanguage: null };
     this.cache.set(userId, settings);
-
     return settings;
   }
 
@@ -40,26 +50,31 @@ export class UserSettingsService {
     userId: number,
     language: LanguageCode | null
   ): Promise<void> {
-    const { error } = await this.supabase
-      .from("user_settings")
-      .upsert(
-        {
-          user_id: userId,
-          target_language: language,
-        },
-        {
-          onConflict: "user_id",
-        }
-      );
+    if (this.supabase) {
+      try {
+        const { error } = await this.supabase
+          .from("user_settings")
+          .upsert(
+            {
+              user_id: userId,
+              target_language: language,
+            },
+            {
+              onConflict: "user_id",
+            }
+          );
 
-    if (error) {
-      console.error("Error saving user settings:", error);
-      throw error;
+        if (error) {
+          console.error("Error saving user settings:", error);
+        }
+      } catch (error) {
+        console.error("Failed to save user settings:", error);
+      }
     }
 
-    const settings = await this.getSettings(userId);
-    settings.targetLanguage = language;
-    this.cache.set(userId, settings);
+    const cached = this.cache.get(userId) ?? { targetLanguage: null };
+    cached.targetLanguage = language;
+    this.cache.set(userId, cached);
   }
 
   async disableTranslation(userId: number): Promise<void> {

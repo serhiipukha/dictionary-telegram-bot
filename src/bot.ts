@@ -17,7 +17,9 @@ import {
 } from "./constants";
 
 // Initialize services
-const supabaseService = new SupabaseService();
+const supabaseService = config.supabase
+  ? new SupabaseService(config.supabase.url, config.supabase.key)
+  : null;
 const dictionaryService = new DictionaryService();
 const userSettingsService = new UserSettingsService(supabaseService);
 const wordRequestLogger = new WordRequestLogger(supabaseService);
