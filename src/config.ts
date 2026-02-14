@@ -13,14 +13,6 @@ if (!apiKey) {
   throw new Error("Missing OPENAI_API_KEY environment variable");
 }
 
-if (!supabaseUrl) {
-  throw new Error("Missing SUPABASE_URL environment variable");
-}
-
-if (!supabaseKey) {
-  throw new Error("Missing SUPABASE_KEY environment variable");
-}
-
 export const config = {
   telegram: {
     botToken,
@@ -31,8 +23,8 @@ export const config = {
     temperature: 0.3,
     maxTokens: 2048,
   },
-  supabase: {
-    url: supabaseUrl,
-    key: supabaseKey,
-  },
+  supabase:
+    supabaseUrl && supabaseKey
+      ? { url: supabaseUrl, key: supabaseKey }
+      : null,
 };
